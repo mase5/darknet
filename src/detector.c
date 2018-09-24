@@ -194,7 +194,7 @@ void train_detector(char *datacfg, char *cfgfile, char *weightfile, int *gpus, i
         if (avg_loss < 0 || avg_loss != avg_loss) avg_loss = loss;    // if(-inf or nan)
         avg_loss = avg_loss*.9 + loss*.1;
         if (min_avg_loss < 0 || min_avg_loss > avg_loss) {
-            min_avg_loss = avg_loss
+            min_avg_loss = avg_loss;
         }
         i = get_current_batch(net);
         printf("\n %d: %f, %f avg loss, %f rate, %lf seconds, %d images\n", get_current_batch(net), loss, avg_loss, get_current_rate(net), (what_time_is_it_now()-time), i*imgs);
