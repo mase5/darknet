@@ -41,6 +41,7 @@ void train_detector(char *datacfg, char *cfgfile, char *weightfile, int *gpus, i
     char *base = basecfg(cfgfile);
     printf("%s\n", base);
     float avg_loss = -1;
+    float min_avg_loss = -1;
     network *nets = calloc(ngpus, sizeof(network));
 
     srand(time(0));
@@ -192,7 +193,9 @@ void train_detector(char *datacfg, char *cfgfile, char *weightfile, int *gpus, i
 #endif
         if (avg_loss < 0 || avg_loss != avg_loss) avg_loss = loss;    // if(-inf or nan)
         avg_loss = avg_loss*.9 + loss*.1;
-
+        if (min_avg_loss < 0 || min_avg_loss > avg_loss) {
+            min_avg_loss = avg_loss
+        }
         i = get_current_batch(net);
         printf("\n %d: %f, %f avg loss, %f rate, %lf seconds, %d images\n", get_current_batch(net), loss, avg_loss, get_current_rate(net), (what_time_is_it_now()-time), i*imgs);
 
@@ -201,10 +204,10 @@ void train_detector(char *datacfg, char *cfgfile, char *weightfile, int *gpus, i
             draw_train_loss(img, img_size, avg_loss, max_img_loss, i, net.max_batches);
 #endif    // OPENCV
 
-        //if (i % 1000 == 0 || (i < 1000 && i % 100 == 0)) {
+        if (i % 1000 == 0 || (i < 1000 && i % 100 == 0) || (i > 500 && min_avg_loss > avg_loss)) {
         //if (i % 100 == 0) {
-        if(i >= (iter_save + 100)) {
-            iter_save = i;
+        // if(i >= (iter_save + 100)) {
+            // iter_save = i;
 #ifdef GPU
             if (ngpus != 1) sync_nets(nets, ngpus, 0);
 #endif
